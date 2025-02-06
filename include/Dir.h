@@ -22,24 +22,24 @@ class Dir : public ICommand{
             name = "dir";
             guide = DIR_GUIDE;
 
-            count_args = 1;
+            args.push_back(ArgData("PATH", "."));
 
-            keys["--recursive"] = { {}, {}, BOOLEAN, false };
-            keys["--depth"] = { {"--recursive"}, {}, INTEGER, -1 };
+            keys["--recursive"] = KeyData(BOOLEAN, false);
+            keys["--depth"] = KeyData(INTEGER, -1, {"--recursive"});
             set_aliases("--recursive", {"-r"});
             set_aliases("--depth", {"-d"});
         }
         
         void command_execution() const override {
             try{
+                string path = get_arg_value(0);
                 bool recursive = get<bool>(get_key_value("--recursive"));
                 int depth = get<int>(get_key_value("--depth"));
-                string path = get_arg_value(0);
                 SystemManager manager;
                 manager.list(path, recursive, depth);
             }
             catch(const exception& e){
-                cerr << COMMAND_EXECUTION_EXCEPTION << "=> " << e.what() << endl;
+                write_error(COMMAND_EXECUTION_EXCEPTION, e.what());
             }
         }
 };

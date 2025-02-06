@@ -24,16 +24,17 @@ class Find : public ICommand{
             name = "find";
             guide = FIND_GUIDE;
              
-            count_args = 2;
+            args.push_back(ArgData("NAME", nullopt));
+            args.push_back(ArgData("PATH", "."));
 
-            keys["--directory"] = { {}, {"--file", "--symlink"}, BOOLEAN, false };
-            keys["--file"] = { {}, {"--directory", "--symlink"}, BOOLEAN, false };
-            keys["--symlink"] = { {}, {"--directory", "--file"}, BOOLEAN, false };
-            keys["--recursive"] = { {}, {}, BOOLEAN, false };
-            keys["--limit"] = { {}, {}, INTEGER, -1 };
-            keys["--depth"] = { {"-recursive"}, {}, INTEGER, -1 };
-            keys["--log-visited"] = { {"-recursive"}, {}, BOOLEAN, false };
-            keys["--log-matches"] = { {"-recursive"}, {}, BOOLEAN, false };
+            keys["--directory"] = KeyData(BOOLEAN, false, {}, {"--file", "--symlink"});
+            keys["--file"] = KeyData(BOOLEAN, false, {}, {"--directory", "--symlink"});
+            keys["--symlink"] = KeyData(BOOLEAN, false, {}, {"--directory", "--file"});
+            keys["--recursive"] = KeyData(BOOLEAN, false);
+            keys["--limit"] = KeyData(INTEGER, -1);
+            keys["--depth"] = KeyData(INTEGER, -1, {"--recursive"});
+            keys["--log-visited"] = KeyData(BOOLEAN, false, {"--recursive"});
+            keys["--log-matches"] = KeyData(BOOLEAN, false, {"--recursive"});
             set_aliases("--directory", {"-dir"});
             set_aliases("--file", {"-f"});
             set_aliases("--symlink", {"-sm"});
@@ -46,6 +47,8 @@ class Find : public ICommand{
 
         void command_execution() const override {
             try{
+                string what = get_arg_value(0);
+                string where = get_arg_value(1);
                 bool directory = get<bool>(get_key_value("--directory"));
                 bool file = get<bool>(get_key_value("--file"));
                 bool link = get<bool>(get_key_value("--symlink"));
@@ -55,11 +58,9 @@ class Find : public ICommand{
                 int depth = get<int>(get_key_value("--depth"));
                 bool log_visited = get<bool>(get_key_value("--log-visited"));
                 bool log_matches = get<bool>(get_key_value("--log-matches"));
-                SystemManager manager;
                 vector<string> matches;
-                vector<string> visited;
-                string what = get_arg_value(0);
-                string where = get_arg_value(1);
+                vector<string> visited {where};
+                SystemManager manager;
                 manager.find(matches, visited, what, where, type, recursive, limit, depth, log_visited);
                 if(log_matches){
                     Log log = Log("matches");
@@ -79,7 +80,7 @@ class Find : public ICommand{
                 }
             }
             catch(const exception& e){
-                cerr << COMMAND_EXECUTION_EXCEPTION << "=> " << e.what() << endl;
+                write_error(COMMAND_EXECUTION_EXCEPTION, e.what());
             }
         }
 };

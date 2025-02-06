@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iomanip>
 #include <optional>
+#include <format>
 
 #include "Exceptions.h"
 
@@ -24,6 +25,25 @@ enum Type{
     INTEGER,
     STRING,
     DOUBLE,
+    UNKNOWN,
+};
+
+/// @brief хранение данных аргумента
+struct ArgData{
+    string name;
+    optional<string> default_value;
+    optional<string> value;
+
+    ArgData() : name(""), default_value(nullopt), value(nullopt) {}
+
+    /// @brief конструктор инициализации данных агрумента
+    /// @param name имя аргумента
+    /// @param default_value значение по умолчанию
+    ArgData(const string& name, const optional<string> default_value) {
+        this->name = name;
+        this->default_value = default_value;
+        this->value = nullopt;
+    }
 };
 
 /// @brief хранение данных ключа
@@ -32,9 +52,29 @@ struct KeyData{
     set<string> excluded_keys; //исключающие ключи для использования
     Type type; //тип значения ключа
     KeyValue default_value; //значение по умолчанию
-    KeyValue value = nullptr; //установленное значение
-    bool is_set = false; //установлено ли значение
+    KeyValue value; //установленное значение
+    bool is_set; //установлено ли значение
+
+    KeyData() : required_keys({}), excluded_keys({}), type(UNKNOWN), default_value(nullptr), value(nullptr), is_set(false) {}
+
+    /// @brief создание данных ключа
+    /// @param required_keys обязательные ключи для использования
+    /// @param excluded_keys исключающие использование ключи
+    /// @param type тип значения ключа
+    /// @param default_value значение по умолчанию
+    KeyData(const Type& type, 
+            const KeyValue& default_value,
+            const set<string>& required_keys = {}, 
+            const set<string>& excluded_keys = {}){
+        this->required_keys = required_keys;
+        this->excluded_keys = excluded_keys;
+        this->type = type;
+        this->default_value = default_value;
+        this->value = nullptr;
+        this->is_set = false;
+    }
 };
+
 
 /// @brief интерфейс для команд 
 class ICommand {
@@ -42,14 +82,12 @@ class ICommand {
         string name;
         string guide;
 
-        int count_args;
-        vector<string> args_values;
+        vector<ArgData> args;
+        int current_index_argument = 0;
         
         //ключи команды
         map<string, KeyData> keys = {
-            {"--help", 
-                { {}, {}, BOOLEAN, false },
-            },
+            {"--help", KeyData(BOOLEAN, false)},
         };
         unordered_map<string, string> key_aliases;
 
@@ -84,6 +122,10 @@ class ICommand {
             }
         }
 
+        virtual int get_count_args() const {
+            return args.size();
+        }
+
         /// @brief получение основного имени ключа.
         /// @param pseudo_key имя ключа.
         /// @return имя основного ключа или nullopt.
@@ -99,19 +141,6 @@ class ICommand {
             }
         }
 
-        /// @brief получение начальной позиции ключей
-        /// @return индекс первого ключа
-        virtual int get_first_key_pos() const {
-            return count_args + 1;
-        }
-
-        /// @brief проверка использования ключа командой
-        /// @param key ключ
-        /// @return команда использует ключ(true) - не использует(false)
-        virtual bool is_command_key(const string& key) const {
-            return get_key(key).has_value();
-        }
-
         /// @brief проверка, что ключ является флагом
         /// @param key ключ
         /// @return ключ является флагом(true) - не является(false)
@@ -120,7 +149,7 @@ class ICommand {
             if(it.has_value())
                 return keys.at(it.value()).type == BOOLEAN;
             else{
-                throw runtime_error(UNKNOWN_KEY_EXCEPTION + "Key: \"" + key + "\".");
+                throw_error(UNKNOWN_KEY_EXCEPTION, format("Attempt to use unknown key: \"{}\" for command: \"{}\".", key, name));
             }
         }
 
@@ -128,20 +157,31 @@ class ICommand {
         /// @param index индекс аргумента
         /// @return значение аргумента
         virtual string get_arg_value(const int index) const {
-            if(index >= args_values.size())
+            if(index >= args.size())
             {
-                throw runtime_error(ARGUMENT_NOT_FOUND_EXCEPTION + "Argument at index: " + to_string(index) + " not found.");
+                throw_error(LIMIT_ARGUMENT_EXCEPTION, format("Attempt to get value for argument but argument at index: {} not exist.", current_index_argument));
             }
-            return args_values[index];
+            if(args[index].value.has_value()){
+                return args[index].value.value();
+            }
+            else{
+                if(args[index].default_value.has_value()){
+                    return args[index].default_value.value();
+                }
+                else{
+                    throw_error(ARGUMENT_MISSING_VALUE_EXCEPTION, format("Argument: \"{}\" hasn't been used.", args[index].name));
+                }
+            }
         }
 
         /// @brief установить аргумент
         /// @param value значение аргумента
         virtual void set_arg_value(const string& value){
-            if(count_args < args_values.size()){
-                throw runtime_error(LIMIT_ARGUMENT_EXCEPTION);
+            if(current_index_argument >= args.size()){
+                throw_error(LIMIT_ARGUMENT_EXCEPTION, format("Attempt to set value for argument but argument at index: {} not exist.", current_index_argument));
             }
-            args_values.push_back(value);
+            args[current_index_argument].value = value;
+            current_index_argument++;
         }
 
         /// @brief получение значения ключа
@@ -150,7 +190,7 @@ class ICommand {
         virtual KeyValue get_key_value(const string& key) const {
             auto it = get_key(key);
             if (!it.has_value()) {
-                throw runtime_error(UNKNOWN_KEY_EXCEPTION + "Key: \"" + key + "\".");
+                throw_error(UNKNOWN_KEY_EXCEPTION, format("Attempt to use unknown key: \"{}\" for command: \"{}\".", key, name));
             }
             const auto& key_data = keys.at(it.value());
             //значение было установлено
@@ -158,13 +198,13 @@ class ICommand {
                 //проверка, что обязательные ключи установлены
                 for (const auto& required_key : key_data.required_keys) {
                     if (keys.at(required_key).is_set == false) {
-                        throw runtime_error(KEY_USAGE_EXCEPTION + "Key \"" + key + "\" requires key \"" + required_key + "\".");
+                        throw_error(KEY_USAGE_EXCEPTION, format("Key \"{}\" requires key \"{}\" but ruquired key hasn't been used.", key, required_key));
                     }
                 }
                 //проверка, что исключенные ключи не установлены
                 for (const auto& excluded_key : key_data.excluded_keys) {
                     if (keys.at(excluded_key).is_set) {
-                        throw runtime_error(KEY_USAGE_EXCEPTION + "Key \"" + key + "\" cannot be used with key \"" + excluded_key + "\".");
+                        throw_error(KEY_USAGE_EXCEPTION, format("Key \"{}\" cannot be used with key \"{}\" but excluded key has been used.", key, excluded_key));
                     }
                 }
                 return key_data.value;
@@ -180,7 +220,7 @@ class ICommand {
             auto it = get_key(key);
             if(it.has_value()){
                 if(keys[it.value()].is_set){
-                    throw runtime_error(KEY_USAGE_EXCEPTION + "Reuse key: \"" + it.value() + "\".");
+                    throw_error(KEY_USAGE_EXCEPTION, format("Attempt to use key: \"{}\" but the key has already been used.", it.value()));
                 }
                 switch (keys[it.value()].type)
                 {
@@ -190,10 +230,10 @@ class ICommand {
                             value_int = stoi(value);
                         }
                         catch (const invalid_argument& e) {
-                            throw runtime_error(INVALID_KEY_VALUE_EXCEPTION + "Invalid argument provided for an integer key: \"" + it.value() + "\".");
+                            throw_error(INVALID_KEY_VALUE_EXCEPTION, format("Attempt to use non-integer value for key: \"{}\".",  it.value()));
                         }
                         catch (const out_of_range& e) {
-                            throw runtime_error(INVALID_KEY_VALUE_EXCEPTION + "Value out of range for an integer key: \"" + it.value() + "\".");
+                            throw_error(INVALID_KEY_VALUE_EXCEPTION, format("Value out of range for an integer key: \"{}\".", it.value()));
                         }
                         keys[it.value()].value = value_int;
                         keys[it.value()].is_set = true;
@@ -211,7 +251,7 @@ class ICommand {
                 }
             }
             else 
-                throw runtime_error(UNKNOWN_KEY_EXCEPTION + "Key: \"" + key + "\".");
+                throw_error(UNKNOWN_KEY_EXCEPTION, format("Attempt to use unknown key: \"{}\" for command: \"{}\".", key, name));
         }
 
         virtual ~ICommand() = default;

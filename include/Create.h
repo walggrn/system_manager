@@ -19,20 +19,19 @@ class Create : public ICommand{
             name = "create";
             guide = CREATE_GUIDE;
 
-            count_args = 1;
+            args.push_back(ArgData("PATH", nullopt));
 
-            keys["--recreate"] = { {}, {}, BOOLEAN, false };
-            keys["--directory"] = { {}, {}, BOOLEAN, false };
+            keys["--recreate"] = KeyData(BOOLEAN, false);
+            keys["--directory"] = KeyData(BOOLEAN, false);
             set_aliases("--recreate", {"-rc"});
             set_aliases("--directory", {"-d"});
         }
         
         void command_execution() const override {
             try{
+                string path = get_arg_value(0);
                 bool recreate = get<bool>(get_key_value("--recreate"));
                 bool directory = get<bool>(get_key_value("--directory"));
-                string symlink = get<string>(get_key_value("--symlink"));
-                string path = get_arg_value(0);
                 SystemManager manager;
                 if(directory)
                     manager.create_directory(path, recreate);
@@ -41,7 +40,7 @@ class Create : public ICommand{
                 cout << "Done." << endl;
             }
             catch(const runtime_error& e){
-                cerr << COMMAND_EXECUTION_EXCEPTION << "=> " << e.what() << endl;
+                write_error(COMMAND_EXECUTION_EXCEPTION, e.what());
             }
         }
 };

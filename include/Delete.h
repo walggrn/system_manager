@@ -19,14 +19,14 @@ class Delete : public ICommand{
             name = "delete";
             guide = DELETE_GUIDE;
 
-            count_args = 1;
+            args.push_back(ArgData("PATH", nullopt));
 
-            keys["--directory"] = { {}, {"--output", "--line", "--skip", "--length"}, BOOLEAN, false };
-            keys["--output"] = { {"--line"}, {"--directory"}, BOOLEAN, false };
-            keys["--line"] = { {}, {"--directory"}, INTEGER, -1 };
-            keys["--skip"] = { {"--line"}, {"--directory"}, INTEGER, 0 };
-            keys["--length"] = { {"--line"}, {"--directory"}, INTEGER, -1 };
-            set_aliases("--directory", {"-d"});
+            keys["--directory"] = KeyData(BOOLEAN, false, {}, {"--output", "--line", "--skip", "--length"});
+            keys["--output"] = KeyData(BOOLEAN, false, {"--line"}, {"--directory"});
+            keys["--line"] = KeyData(INTEGER, -1, {}, {"--directory"});
+            keys["--skip"] = KeyData(INTEGER, 0, {"--line"}, {"--directory"});
+            keys["--length"] = KeyData(INTEGER, -1, {"--line"}, {"--directory"});
+            set_aliases("--directory", {"-dir"});
             set_aliases("--output", {"-o"});
             set_aliases("--line", {"-l"});
             set_aliases("--skip", {"-s"});
@@ -35,12 +35,12 @@ class Delete : public ICommand{
         
         void command_execution() const override {
             try{
+                string path = get_arg_value(0);
                 bool directory = get<bool>(get_key_value("--directory"));
                 bool output = get<bool>(get_key_value("--output"));
                 int number_line = get<int>(get_key_value("--line"));
                 int skip = get<int>(get_key_value("--skip"));
                 int length = get<int>(get_key_value("--length"));
-                string path = get_arg_value(0);
                 SystemManager manager;
                 if(directory)
                     manager.delete_directory(path);
@@ -57,7 +57,7 @@ class Delete : public ICommand{
                     cout << "Done." << endl;
             }
             catch(const runtime_error& e){
-                cerr << COMMAND_EXECUTION_EXCEPTION << "=> " << e.what() << endl;
+                write_error(COMMAND_EXECUTION_EXCEPTION, e.what());
             }
         }
 };

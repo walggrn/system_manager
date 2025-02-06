@@ -18,11 +18,12 @@ class Insert : public ICommand{
             name = "insert";
             guide = INSERT_GUIDE;
             
-            count_args = 2;
+            args.push_back(ArgData("DATA", nullopt));
+            args.push_back(ArgData("PATH", nullopt));
 
-            keys["--output"] = { {"--line"}, {}, BOOLEAN, false };
-            keys["--line"] = { {}, {}, INTEGER, -1 };
-            keys["--skip"] = { {"--line"}, {}, INTEGER, 0 };
+            keys["--output"] = KeyData(BOOLEAN, false, {"--line"});
+            keys["--line"] = KeyData(INTEGER, -1);
+            keys["--skip"] = KeyData(INTEGER, 0, {"--line"});
             set_aliases("--output", {"-o"});
             set_aliases("--line", {"-l"});
             set_aliases("--skip", {"-s"});
@@ -30,12 +31,12 @@ class Insert : public ICommand{
 
         void command_execution() const override {
             try{
+                string data = get_arg_value(0);
+                string path = get_arg_value(1);
                 int number_line = get<int>(get_key_value("--line"));
                 int skip = get<int>(get_key_value("--skip"));
                 bool output = get<bool>(get_key_value("--output"));
                 SystemManager manager;
-                string path = get_arg_value(0);
-                string data = get_arg_value(1);
                 manager.insert(path, data, number_line, skip);
                 if(output)
                     cout << manager.read(path) << endl;
@@ -43,7 +44,7 @@ class Insert : public ICommand{
                     cout << "Done." << endl;
             }
             catch(const exception& e){
-                cerr << COMMAND_EXECUTION_EXCEPTION << "=> " << e.what() << endl;
+                write_error(COMMAND_EXECUTION_EXCEPTION, e.what());
             }
         }
 };

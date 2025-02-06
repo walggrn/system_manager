@@ -6,6 +6,8 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <optional>
+#include <format>
 
 #include "ICommand.h"
 #include "Exceptions.h"
@@ -40,7 +42,7 @@ class Parser{
             if(!token.empty())
                 tokens.push_back(token);
             if(in_quotes){
-                throw runtime_error(INPUT_EXCEPTION + "Unfinished expression in quotes.");
+                throw_error(INPUT_EXCEPTION, "Unfinished expression in quotes.");
             }
             return tokens;
         }
@@ -52,36 +54,37 @@ class Parser{
                         ICommand& command){
             for(size_t pos = 1; pos < tokens.size(); pos++){
                 string token = tokens[pos];
-                //TODO реализовать более практичное использование --help
-                if(token.compare("--help") == 0 || token.compare("-h") == 0){
-                    if(pos != 1){
-                        cerr << HELP_KEY_IGNORED_WARNING << endl;
-                        continue;
+                optional<string> key;
+                if((key = command.get_key(token)).has_value()){
+                    if(command.is_simple_key(key.value())){
+                        if(key.value().compare("--help") == 0){
+                            if(pos != 1){
+                                cerr << HELP_KEY_IGNORED_WARNING << endl;
+                                continue;
+                            }
+                            else{
+                                if(tokens.size() > 2){
+                                    cerr << HELP_KEY_TYPED_WARNING << endl;
+                                }
+                                command.set_key_value("--help");
+                                return;
+                            }  
+                        }
+                        command.set_key_value(key.value());
+                    }
+                    else if(pos + 1 == tokens.size()){
+                        throw_error(MISSING_KEY_VALUE_EXCEPTION, format("Key: \"{}\".", key.value()));
                     }
                     else{
-                        if(tokens.size() > 2){
-                            cerr << HELP_KEY_TYPED_WARNING << endl;
-                        }
-                        command.set_key_value("--help");
-                        return;
-                    }           
-                }
-                if(pos < command.get_first_key_pos())
-                    command.set_arg_value(token);
-                else{
-                    if(command.is_command_key(token)){
-                        if(command.is_simple_key(token))
-                            command.set_key_value(token);
-                        else if(pos + 1 == tokens.size()){
-                            throw runtime_error(MISSING_KEY_VALUE_EXCEPTION + "Key: \"" + token + "\".");
-                        }
-                        else{
-                            command.set_key_value(token, tokens[pos + 1]);
-                            ++pos;
-                        }
+                        command.set_key_value(key.value(), tokens[pos + 1]);
+                        ++pos;
                     }
-                    else 
-                        throw runtime_error(UNKNOWN_KEY_EXCEPTION + "Key: \"" + token + "\".");
+                }
+                else{
+                    if(command.get_count_args() + 1 <= pos){
+                        throw_error(UNKNOWN_TOKEN_EXCEPTION, format("Token: \"{}\".", token));
+                    }
+                    command.set_arg_value(token);
                 }
             }
         }

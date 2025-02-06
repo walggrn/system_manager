@@ -22,22 +22,22 @@ class Read : public ICommand{
             name = "read";
             guide = READ_GUIDE;
 
-            count_args = 1;
+            args.push_back(ArgData("PATH", nullopt));
 
-            keys["--detail"] = { {}, {}, BOOLEAN, false };
+            keys["--detail"] = KeyData(BOOLEAN, false);
             set_aliases("--detail", {"-dt"});
         }
         
         void command_execution() const override {
             try{
-                bool detail = get<bool>(get_key_value("--detail"));
                 string path = get_arg_value(0);
+                bool detail = get<bool>(get_key_value("--detail"));
                 SystemManager manager;
                 string data = manager.read(path, detail);
                 cout << data << endl;
             }
             catch(const exception& e){
-                cerr << COMMAND_EXECUTION_EXCEPTION << "=> " << e.what() << endl;
+                write_error(COMMAND_EXECUTION_EXCEPTION, e.what());
             }
         }
 };

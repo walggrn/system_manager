@@ -1,0 +1,9 @@
+.vscode/
+googletest/
+logs/
+tests/
+docs/
+build/
+bin/
+reports/
+dist/

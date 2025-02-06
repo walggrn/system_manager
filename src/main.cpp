@@ -43,7 +43,7 @@ void handle_command(vector<string>& tokens, shared_ptr<ICommand> command){
         parser.parse_tokens(tokens, *command);
     }
     catch(const exception& e){
-        cerr << INPUT_EXCEPTION << "=> " << e.what() << endl;
+        write_error(INPUT_EXCEPTION, e.what());
         return;
     }
     command->execute();
@@ -107,7 +107,7 @@ int main(){
         else if(command_name.compare("exit") == 0)
             break;
         else
-            cout << INPUT_EXCEPTION << "Command: " << command_name << " don't found, type \"list\" to see a list of available commands" << endl;
+            write_error(INPUT_EXCEPTION, format("Command: \"{}\" don't found, type \"list\" to see a list of available commands.", command_name));
     }
     return 0;
 }

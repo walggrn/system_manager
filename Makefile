@@ -1,6 +1,6 @@
 SRC_DIR = src
 BUILD_DIR = build
-BUILD_FILE = file_manager
+BUILD_FILE = system_manager
 INSTALL_DIR = bin
 DIST_DIR = dist
 DOC_DIR = docs
