@@ -5,5 +5,8 @@ tests/
 docs/
 build/
 bin/
-reports/
 dist/
+include/
+src/
+Makefile
+Doxyfile
