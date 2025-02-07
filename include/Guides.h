@@ -6,12 +6,45 @@
 
 using namespace std;
 
-const string COPY_GUIDE = R"(
-Usage:
+const string INITIAL_MESSAGE = R"(Welcome to the Console Manager!
+This tool helps you manage files and directories directly from the terminal.
+Type "help" to see detailed usage instructions, or "list" to view all available commands.
+If you're unsure about how to use a specific command, try "command_name --help" for guidance.)";
+
+const string GUIDE = R"(System Manager - Guide
+This tool supports the following commands:
+    copy                                         Copies objects. Default copies files.
+    create                                       Creates objects. Default creates files.
+    delete                                       
+    dir                                          Displays directory contents.
+    find                                         Finds object. Default finds files, directories and symlinks.
+    insert                                       Inserts data to files.
+    modify                                       Renames or moves objects.
+    read                                         Displays file contents.
+    list                                         Shows a list of all available commands.
+    help                                         Shows a guide.
+    exit                                         Ends the program.
+      
+For more details on any command, type "command_name --help".)";
+
+const string LIST_COMMANDS = R"(Commands:
+    copy
+    create
+    delete
+    dir
+    find
+    insert
+    modify
+    read
+    list
+    help
+    exit)";
+
+const string COPY_GUIDE = R"(Usage:
     copy <args> [options]
 
 Description:
-    Copyis objects. Default object is a file.
+    Copies objects. Default copies files.
 
 Arguments:
     <PATH1>                                      Path of the object to be copied.
@@ -22,27 +55,23 @@ Options:
                                                  specified, raises an error. 
     --directory, -dir                            Copy a directory instead of a file.
     --recursive. -r                              Copy all contents of the directory, including subdirectories 
-                                                 and their files. Required keys: --directory.
-            )";
+                                                 and their files. Required keys: --directory.)";
 
-const string CREATE_GUIDE = R"(
-Usage:
+const string CREATE_GUIDE = R"(Usage:
     create <args> [options]
 
 Description:
-    Creaties objects. Defaul object is a file.
+    Creates objects. Default creates files.
 
 Arguments:
     <PATH>                                       Path of the object where it will be created.
 
 Options:
-    --recreate, -rc                              Delete an object before copying if it already exists. If key is not 
+    [--recreate, -rc]                            Delete an object before copying if it already exists. If key is not 
                                                  specified, raises an error. 
-    --directory, -dir                            Create a directory instead of a file.
-            )";
+    [--directory, -dir]                          Create a directory instead of a file.)";
 
-const string DELETE_GUIDE = R"(
-Usage:
+const string DELETE_GUIDE = R"(Usage:
     delete <args> [options]
 
 Description:
@@ -65,98 +94,90 @@ Options:
                                                  Excluded keys: --directory.
     [--output, -o]                               Display file contents after deletion. 
                                                  Required keys: --line. 
-                                                 Excluded keys: --directory.
-            )";
+                                                 Excluded keys: --directory.)";
 
-const string DIR_GUIDE = R"(
-Usage:
+const string DIR_GUIDE = R"(Usage:
     dir <args> [options]
 
 Description:
-    Displays directory contents.
+    Display directory contents.
 
 Arguments:
-    <PATH>                                       Path of the directory.
+    <PATH>                                       Path of the directory. if not specified, the current directory will be used.
 
 Options:
-    [--recursive, -r]                              -
-    [--depth, -d]                                  -
-            )";
+    [--recursive, -r]                            Display also children directories contents.
+    [--depth, -d]                                Don't go down into children directories below <number>. 
+                                                 Required keys: --recursive.)";
 
-const string FIND_GUIDE = R"(
-Usage:
+const string FIND_GUIDE = R"(Usage:
     find <args> [options]
 
 Description:
-    Finds object. Default find files, directories and symlinks.
+    Finds object. Default finds files, directories and symlinks.
 
 Arguments:
-    <NAME>                                       Name of the object to search for.
-    <PATH>                                       Path where to search.
+    <NAME>                                       Search for objects named <NANE>.
+    <PATH>                                       Directory at the specified <PATH> where to search. 
+                                                 if not specified, the current directory will be used.
 
 Options:
-    --directory                                  Search directories only. 
+    [--contains, -c]                             
+    [--directory, -dir]                          Search directories only. 
                                                  Excluded keys: --file, --symlink.
-    --file                                       Search files only. 
+    [--file, -f]                                 Search files only. 
                                                  Excluded keys: --directory, --symlink.
-    --symlink                                    Search symlinks only. 
+    [--symlink, -sm]                             Search symlinks only. 
                                                  Excluded keys: --directory, --file.
-    --limit <number>                             The number of matches does not exceed number.
-    --recursive                                  Recursive directory traversal.
-    --depth <number>                             Don't go down into nested directories below number. 
+    [--limit, -lim] <number>                     The number of matches does not exceed <number>.
+    [--recursive, -r]                            Recursive directory traversal.
+    [--depth, -d] <number>                       Don't go down into nested directories below <number>. 
                                                  Required keys: --recursive.
-    --log-visited                                Save the list of visited directories to "./logs/". 
+    [--log-visited, -lv]                         Save the list of visited directories to "./logs/". 
                                                  Required keys: --recursive.
-    --log-matches                                Save the list of matches to "./logs/".
-            )";
+    [--log-matches, -lm]                         Save the list of matches to "./logs/".)";
 
-const string INSERT_GUIDE = R"(
-Usage:
+const string INSERT_GUIDE = R"(Usage:
     insert <args> [options]
 
 Description:
-    Inserts data to a file.
+    Insert data to files.
 
 Arguments:
     <DATA>                                       Data to insert. 
-    <PATH>                                       Path of the file.
+    <PATH>                                       File at the specified <PATH>.
 
 Options:
-    --line <number>                              Insert into line under number .
-    --skip <number>                              Skip number of symbols before inserting. If the number exceeds the length of the string, 
+    [--line, -l] <number>                        Insert into line under <number>.
+    [--skip, -s] <number>                        Skip <number> of symbols before inserting. If the number exceeds the length of the string, 
                                                  the data will be inserted at the end. 
                                                  Required keys: --line.
-    --output                                     Display file contents after insertion.
-            )";
+    [--output, -o]                               Display file contents after insertion.)";
 
-const string MODIFY_GUIDE = R"(
-Usage:
+const string MODIFY_GUIDE = R"(Usage:
     modify <args> [options]
 
 Description:
-    Renames or moves objects.
+    Rename or move objects.
 
 Arguments:
-    <PATH1>                                      Сurrent path of the object.
-    <PATH2>                                      New path of the object.
+    <PATH1>                                      Object at the current specified <PATH1> Сurrent path of the object.
+    <PATH2>                                      .
 
 Options:
-    --recreate                                   Delete an object before modifing if it already exists. If key is not 
-                                                 specified, raises an error.
-            )";
+    [--recreate, -rc]                            Delete an object before modifing if it already exists. If key is not 
+                                                 specified, raises an error.)";
 
-const string READ_GUIDE = R"(
-Usage:
+const string READ_GUIDE = R"(Usage:
     read <args> [options]
 
 Description:
-    Displays file contents.
+    Display file contents.
 
 Arguments:
-    <PATH>                                       Path of the file.
+    <PATH>                                       File at the specified <PATH>.
 
 Options:
-    --detail                                     Number before each line and length at the end.
-            )";
+    [--detail, -dt]                              Number before each line and length at the end.)";
 
 #endif

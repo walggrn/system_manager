@@ -1,65 +1,80 @@
 #ifndef DELETE_H
 #define DELETE_H
 
-#include <string>
-#include <map>
 #include <iostream>
+#include <map>
 #include <stdexcept>
+#include <string>
 
-#include "ICommand.h"
-#include "SystemManager.h"
 #include "Exceptions.h"
 #include "Guides.h"
+#include "ICommand.h"
+#include "SystemManager.h"
 
 using namespace std;
 
-class Delete : public ICommand{
-    public:
-        Delete(){
-            name = "delete";
-            guide = DELETE_GUIDE;
+class Delete : public ICommand {
+private:
+  string Path;
+  int Line;
+  int Skip;
+  int Length;
+  bool Output;
+  bool Directory;
 
-            args.push_back(ArgData("PATH", nullopt));
+public:
+  Delete() {
+    name = "delete";
+    guide = DELETE_GUIDE;
 
-            keys["--directory"] = KeyData(BOOLEAN, false, {}, {"--output", "--line", "--skip", "--length"});
-            keys["--output"] = KeyData(BOOLEAN, false, {"--line"}, {"--directory"});
-            keys["--line"] = KeyData(INTEGER, -1, {}, {"--directory"});
-            keys["--skip"] = KeyData(INTEGER, 0, {"--line"}, {"--directory"});
-            keys["--length"] = KeyData(INTEGER, -1, {"--line"}, {"--directory"});
-            set_aliases("--directory", {"-dir"});
-            set_aliases("--output", {"-o"});
-            set_aliases("--line", {"-l"});
-            set_aliases("--skip", {"-s"});
-            set_aliases("--length",  {"-len"});
-        }
-        
-        void command_execution() const override {
-            try{
-                string path = get_arg_value(0);
-                bool directory = get<bool>(get_key_value("--directory"));
-                bool output = get<bool>(get_key_value("--output"));
-                int number_line = get<int>(get_key_value("--line"));
-                int skip = get<int>(get_key_value("--skip"));
-                int length = get<int>(get_key_value("--length"));
-                SystemManager manager;
-                if(directory)
-                    manager.delete_directory(path);
-                else if(number_line != -1)
-                    manager.delete_data_from_file(path, number_line, skip, length);
-                else 
-                    manager.delete_file(path);
-                if(output)
-                {
-                    string data = manager.read(path);
-                    cout << data << endl;
-                }
-                else 
-                    cout << "Done." << endl;
-            }
-            catch(const runtime_error& e){
-                write_error(COMMAND_EXECUTION_EXCEPTION, e.what());
-            }
-        }
+    args.push_back(ArgData("PATH", nullopt));
+
+    keys["--directory"] = KeyData(BOOLEAN, false, {},
+                                  {"--output", "--line", "--skip", "--length"});
+    keys["--output"] = KeyData(BOOLEAN, false, {"--line"}, {"--directory"});
+    keys["--line"] = KeyData(INTEGER, -1, {}, {"--directory"});
+    keys["--skip"] = KeyData(INTEGER, 0, {"--line"}, {"--directory"});
+    keys["--length"] = KeyData(INTEGER, -1, {"--line"}, {"--directory"});
+    set_aliases("--directory", {"-dir"});
+    set_aliases("--output", {"-o"});
+    set_aliases("--line", {"-l"});
+    set_aliases("--skip", {"-s"});
+    set_aliases("--length", {"-len"});
+  }
+
+  void set_parametrs() override {
+    try {
+      Path = get_arg_value(0);
+      Line = get<int>(get_key_value("--line"));
+      Skip = get<int>(get_key_value("--skip"));
+      Length = get<int>(get_key_value("--length"));
+      Output = get<bool>(get_key_value("--output"));
+      Directory = get<bool>(get_key_value("--directory"));
+    } catch (const runtime_error &e) {
+      throw_error(COMMAND_INCORRECT_PARAMETRS_EXCEPTION, e.what());
+    }
+  }
+
+  void command_execution() const override {
+    try {
+      SystemManager manager;
+      if (Directory) {
+        manager.delete_directory(Path);
+      } else if (Line != -1) {
+        manager.delete_data_from_file(Path, Line, Skip, Length);
+      } else {
+        manager.delete_file(Path);
+      }
+      if (Output) {
+        string data = manager.read(Path);
+        cout << data << endl;
+      } else {
+        cout << "Done." << endl;
+      }
+    } catch (const runtime_error &e) {
+      write_error(COMMAND_EXECUTION_EXCEPTION, e.what());
+    }
+  }
 };
 
 #endif

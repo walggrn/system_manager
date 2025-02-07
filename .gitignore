@@ -1,9 +1,8 @@
 .vscode/
-googletest/
-logs/
-tests/
-docs/
 build/
 bin/
-reports/
+docs/
 dist/
+
+googletest/
+Doxyfile
