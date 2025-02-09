@@ -2,15 +2,15 @@
 #include <iostream>
 #include <vector>
 
-#include "Parser.h"
 #include "mock_command.h"
+#include "utils/Parser.h"
 
 using namespace std;
 
 class TestParser : public testing::Test {
 protected:
   Parser Parser;
-  MockCommand Mock; // arg1 arg2 k1 k2 k3(int)
+  MockCommand Mock; // arg1 arg2 k1 k2(string) k3(int)
   vector<string> Parametrs;
 
   void SetUp() override {

@@ -1,8 +1,10 @@
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
+#include <string>
+#include <vector>
 
-#include "SystemManager.h"
+#include "utils/SystemManager.h"
 
 using namespace std;
 namespace fs = std::filesystem;

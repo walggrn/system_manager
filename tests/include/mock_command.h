@@ -1,7 +1,7 @@
 #include <string>
 #include <tuple>
 
-#include "ICommand.h"
+#include "commands/ICommand.h"
 
 using namespace std;
 

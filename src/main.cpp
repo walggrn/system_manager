@@ -8,17 +8,17 @@
 #include <string>
 #include <vector>
 
-#include "Copy.h"
-#include "Create.h"
-#include "Delete.h"
-#include "Dir.h"
-#include "Exceptions.h"
-#include "Find.h"
-#include "Guides.h"
-#include "Insert.h"
-#include "Modify.h"
-#include "Parser.h"
-#include "Read.h"
+#include "commands/Copy.h"
+#include "commands/Create.h"
+#include "commands/Delete.h"
+#include "commands/Dir.h"
+#include "commands/Find.h"
+#include "commands/Insert.h"
+#include "commands/Modify.h"
+#include "commands/Read.h"
+#include "messages/Exceptions.h"
+#include "messages/Guides.h"
+#include "utils/Parser.h"
 
 using namespace std;
 

@@ -5,6 +5,9 @@ set(TESTS_SOURCE
     ${CMAKE_SOURCE_DIR}/tests/src/test_parser.cpp
     ${CMAKE_SOURCE_DIR}/tests/src/test_system_manager.cpp
     ${CMAKE_SOURCE_DIR}/tests/src/mock_command.cpp
+    ${CMAKE_SOURCE_DIR}/src/utils/SystemManager.cpp
+    ${CMAKE_SOURCE_DIR}/src/utils/Parser.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/ICommand.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/include)

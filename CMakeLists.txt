@@ -5,6 +5,18 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(SOURCES 
     ${CMAKE_SOURCE_DIR}/src/main.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/Copy.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/Create.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/Delete.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/Dir.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/Find.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/ICommand.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/Insert.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/Modify.cpp
+    ${CMAKE_SOURCE_DIR}/src/commands/Read.cpp
+    ${CMAKE_SOURCE_DIR}/src/utils/Parser.cpp
+    ${CMAKE_SOURCE_DIR}/src/utils/Log.cpp
+    ${CMAKE_SOURCE_DIR}/src/utils/SystemManager.cpp
 ) 
 
 set(HEADERS ${CMAKE_SOURCE_DIR}/include)
