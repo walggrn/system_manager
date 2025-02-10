@@ -3,6 +3,10 @@ build/
 bin/
 docs/
 dist/
+src/
+tests/
+include/
+CMakeLists.txt
 
 googletest/
 Doxyfile
