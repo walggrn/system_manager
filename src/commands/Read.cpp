@@ -11,6 +11,8 @@
 
 using namespace std;
 
+/// @brief Настройка команды(имя, руководство, аргументы, ключи, аналогичные
+/// имена для ключей)
 Read::Read() {
   name = "read";
   guide = READ_GUIDE;
@@ -21,6 +23,7 @@ Read::Read() {
   set_aliases("--detail", {"-dt"});
 };
 
+/// @brief обработка параметров
 void Read::set_parametrs() {
   try {
     Path = get_arg_value(0);
@@ -30,6 +33,7 @@ void Read::set_parametrs() {
   }
 };
 
+/// @brief выполнение команды
 void Read::command_execution() const {
   try {
     SystemManager manager;

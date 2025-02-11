@@ -14,6 +14,8 @@
 
 using namespace std;
 
+/// @brief Настройка команды(имя, руководство, аргументы, ключи, аналогичные
+/// имена для ключей)
 Find::Find() {
   name = "find";
   guide = FIND_GUIDE;
@@ -41,6 +43,7 @@ Find::Find() {
   set_aliases("--log-matches", {"-lm"});
 };
 
+/// @brief обработка параметров
 void Find::set_parametrs() {
   try {
     Name = get_arg_value(0);
@@ -62,6 +65,7 @@ void Find::set_parametrs() {
   }
 };
 
+/// @brief выполнение команды
 void Find::command_execution() const {
   try {
     vector<string> matches;

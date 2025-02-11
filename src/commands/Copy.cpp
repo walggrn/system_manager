@@ -11,6 +11,8 @@
 
 using namespace std;
 
+/// @brief Настройка команды(имя, руководство, аргументы, ключи, аналогичные
+/// имена для ключей)
 Copy::Copy() {
   name = "copy";
   guide = COPY_GUIDE;
@@ -27,6 +29,7 @@ Copy::Copy() {
   set_aliases("--recursive", {"-r"});
 };
 
+/// @brief обработка параметров
 void Copy::set_parametrs() {
   try {
     PathFrom = get_arg_value(0);
@@ -39,6 +42,7 @@ void Copy::set_parametrs() {
   }
 }
 
+/// @brief выполнение команды
 void Copy::command_execution() const {
   try {
     SystemManager manager;

@@ -11,6 +11,8 @@
 
 using namespace std;
 
+/// @brief Настройка команды(имя, руководство, аргументы, ключи, аналогичные
+/// имена для ключей)
 Delete::Delete() {
   name = "delete";
   guide = DELETE_GUIDE;
@@ -30,6 +32,7 @@ Delete::Delete() {
   set_aliases("--length", {"-len"});
 };
 
+/// @brief обработка параметров
 void Delete::set_parametrs() {
   try {
     Path = get_arg_value(0);
@@ -43,6 +46,7 @@ void Delete::set_parametrs() {
   }
 };
 
+/// @brief выполнение команды
 void Delete::command_execution() const {
   try {
     SystemManager manager;

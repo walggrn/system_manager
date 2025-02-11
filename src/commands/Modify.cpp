@@ -9,6 +9,8 @@
 
 using namespace std;
 
+/// @brief Настройка команды(имя, руководство, аргументы, ключи, аналогичные
+/// имена для ключей)
 Modify::Modify() {
   name = "modify";
   guide = MODIFY_GUIDE;
@@ -20,6 +22,7 @@ Modify::Modify() {
   set_aliases("--recreate", {"-rc"});
 };
 
+/// @brief обработка параметров
 void Modify::set_parametrs() {
   try {
     CurrentPath = get_arg_value(0);
@@ -30,6 +33,7 @@ void Modify::set_parametrs() {
   }
 };
 
+/// @brief выполнение команды
 void Modify::command_execution() const {
   try {
     SystemManager manager;

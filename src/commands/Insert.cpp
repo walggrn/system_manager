@@ -9,6 +9,8 @@
 
 using namespace std;
 
+/// @brief Настройка команды(имя, руководство, аргументы, ключи, аналогичные
+/// имена для ключей)
 Insert::Insert() {
   name = "insert";
   guide = INSERT_GUIDE;
@@ -24,11 +26,12 @@ Insert::Insert() {
   set_aliases("--skip", {"-s"});
 };
 
+/// @brief обработка параметров
 void Insert::set_parametrs() {
   try {
     Data = get_arg_value(0);
     Path = get_arg_value(1);
-    Line = get<int>(get_key_value("--line"));
+    Line = get<int>(get_key_value("--line")) - 1;
     Skip = get<int>(get_key_value("--skip"));
     Output = get<bool>(get_key_value("--output"));
   } catch (const runtime_error &e) {
@@ -36,6 +39,7 @@ void Insert::set_parametrs() {
   }
 };
 
+/// @brief выполнение команды
 void Insert::command_execution() const {
   try {
     SystemManager manager;

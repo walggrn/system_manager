@@ -11,6 +11,8 @@
 
 using namespace std;
 
+/// @brief Настройка команды(имя, руководство, аргументы, ключи, аналогичные
+/// имена для ключей)
 Create::Create() {
   name = "create";
   guide = CREATE_GUIDE;
@@ -23,6 +25,7 @@ Create::Create() {
   set_aliases("--directory", {"-d"});
 };
 
+/// @brief обработка параметров
 void Create::set_parametrs() {
   try {
     Path = get_arg_value(0);
@@ -33,6 +36,7 @@ void Create::set_parametrs() {
   }
 };
 
+/// @brief выполнение команды
 void Create::command_execution() const {
   try {
     SystemManager manager;

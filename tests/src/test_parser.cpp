@@ -20,12 +20,12 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(TestParser, PositiveInputParsingEmptyString) {
+TEST_F(TestParser, P_Input_PositiveParsingEmptyString) {
   auto tokens = Parser.parse_input("");
   ASSERT_EQ(tokens.size(), 0) << "Excpected 0 tokens but got " << tokens.size();
 }
 
-TEST_F(TestParser, PositiveInputParsingString) {
+TEST_F(TestParser, P_Input_PositiveParsingString) {
   auto tokens =
       Parser.parse_input("     create                \"temp\"      -rc      ");
   ASSERT_EQ(tokens.size(), 3) << "Excpected 3 tokens but got " << tokens.size();
@@ -34,13 +34,13 @@ TEST_F(TestParser, PositiveInputParsingString) {
   EXPECT_EQ(tokens[2], "-rc") << tokens[2] << " != " << "-rc";
 }
 
-TEST_F(TestParser, NegativeInputParsingUnfinishedQuotes) {
+TEST_F(TestParser, P_Input_NegativeParsingUnfinishedQuotes) {
   EXPECT_THROW(Parser.parse_input("create \"temp\"      -rc      \"\"\""),
                runtime_error)
       << "Excpected a exception ";
 }
 
-TEST_F(TestParser, PositiveTokensParsingCorrectParametrs) {
+TEST_F(TestParser, P_Tokens_PositiveParsingCorrectParametrs) {
   ASSERT_NO_THROW(Parser.parse_tokens(Parametrs, Mock))
       << "Exception was throwed during parsing tokens";
   string arg1, arg2, key2;
@@ -56,7 +56,7 @@ TEST_F(TestParser, PositiveTokensParsingCorrectParametrs) {
       << key3 << " != " << stoi(Parametrs.at(6));
 }
 
-TEST_F(TestParser, PositiveTokensParsingEmptyArgument) {
+TEST_F(TestParser, P_Tokens_PositiveParsingEmptyArgument) {
   Parametrs.erase(Parametrs.begin() + 1);
   ASSERT_NO_THROW(Parser.parse_tokens(Parametrs, Mock))
       << "Exception was throwed during parsing tokens";
@@ -68,7 +68,7 @@ TEST_F(TestParser, PositiveTokensParsingEmptyArgument) {
   EXPECT_EQ(arg2, "default") << arg2 << " != " << "default";
 }
 
-TEST_F(TestParser, NegativeTokensUnknownKey) {
+TEST_F(TestParser, P_Tokens_NegativeParsingUnknownKey) {
   Parametrs[2] = "-k11";
   EXPECT_THROW(
       {
@@ -83,7 +83,7 @@ TEST_F(TestParser, NegativeTokensUnknownKey) {
       std::runtime_error);
 }
 
-TEST_F(TestParser, NegativeTokensParsingEmptyValueForKey) {
+TEST_F(TestParser, P_Tokens_NegativeParsingEmptyValueForKey) {
   Parametrs.pop_back();
   EXPECT_THROW(
       {
@@ -98,7 +98,7 @@ TEST_F(TestParser, NegativeTokensParsingEmptyValueForKey) {
       std::runtime_error);
 }
 
-TEST_F(TestParser, NegativeTokensParsingWrongValueForIntegerKey) {
+TEST_F(TestParser, P_Tokens_NegativeParsingWrongValueForIntegerKey) {
   Parametrs[6] = "str(10)";
   EXPECT_THROW(
       {
@@ -113,7 +113,7 @@ TEST_F(TestParser, NegativeTokensParsingWrongValueForIntegerKey) {
       std::runtime_error);
 }
 
-TEST_F(TestParser, NegativeTokensParsingWronValueForIntegerKey) {
+TEST_F(TestParser, P_Tokens_NegativeParsingBigValueForIntegerKey) {
   Parametrs[6] = "1111111111111111111111111111111111111111111";
   EXPECT_THROW(
       {
@@ -128,7 +128,7 @@ TEST_F(TestParser, NegativeTokensParsingWronValueForIntegerKey) {
       std::runtime_error);
 }
 
-TEST_F(TestParser, NegativeTokensParsingResetKey) {
+TEST_F(TestParser, P_Tokens_NegativeParsingResetKey) {
   Parametrs.push_back("-k1");
   EXPECT_THROW(
       {

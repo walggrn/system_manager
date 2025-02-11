@@ -281,6 +281,9 @@ void SystemManager::find(vector<string> &matches, vector<string> &visited,
     } catch (const fs::filesystem_error &e) {
       write_error(FILESYSTEM_EXCEPTION, e.what());
     }
+    if (log_visited) {
+      visited.push_back(path);
+    }
     for (const auto &entry : current_dir) {
       string path = entry.path().string();
       if (entry.path().filename().compare(name) == 0 ||
@@ -294,9 +297,6 @@ void SystemManager::find(vector<string> &matches, vector<string> &visited,
         }
       }
       if (recursive && validate_type_object(path, Directory)) {
-        if (log_visited) {
-          visited.push_back(path);
-        }
         find(matches, visited, name, path, contains, type, limit, recursive,
              depth, log_visited, current_depth + 1);
       }
@@ -348,14 +348,14 @@ void SystemManager::insert(const string &path, const string &data,
   while (getline(file, line))
     lines.push_back(line);
   file.close();
-  if (number_line == -1 || number_line > lines.size()) {
+  if (number_line <= -1 || number_line >= lines.size()) {
     lines.push_back("");
-    number_line = lines.size();
+    number_line = lines.size() - 1;
   }
-  if (skip == -1 || skip > lines[number_line - 1].size()) {
-    skip = lines[number_line - 1].size();
+  if (skip <= -1 || skip >= lines[number_line].size()) {
+    skip = lines[number_line].size();
   }
-  lines[number_line - 1].insert(skip, data);
+  lines[number_line].insert(skip, data);
   file.open(path, ios::out | ios::trunc);
   if (!file.is_open()) {
     throw_error(FILE_OPEN_EXCEPTION,

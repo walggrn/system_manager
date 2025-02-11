@@ -11,6 +11,8 @@
 
 using namespace std;
 
+/// @brief Настройка команды(имя, руководство, аргументы, ключи, аналогичные
+/// имена для ключей)
 Dir::Dir() {
   name = "dir";
   guide = DIR_GUIDE;
@@ -23,6 +25,7 @@ Dir::Dir() {
   set_aliases("--depth", {"-d"});
 };
 
+/// @brief обработка параметров
 void Dir::set_parametrs() {
   try {
     Path = get_arg_value(0);
@@ -33,6 +36,7 @@ void Dir::set_parametrs() {
   }
 };
 
+/// @brief выполнение команды
 void Dir::command_execution() const {
   try {
     SystemManager manager;

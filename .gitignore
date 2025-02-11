@@ -3,6 +3,10 @@ build/
 bin/
 docs/
 dist/
+reports/
+Doxyfile
+include/
+src/
+tests/
 
 googletest/
-Doxyfile
