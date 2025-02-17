@@ -72,6 +72,7 @@ auto main() -> int {
     }
     //1111
     //22222
+    //33333
     string command_name = tokens[0];
     // проверяем имя команды
     auto command = Commands.find(command_name);

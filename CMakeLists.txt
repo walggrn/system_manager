@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.31)
 project(SystemManager)
 #cmake
 #2222222
+#3333333
 set(CMAKE_CXX_STANDARD 20)
 
 set(SOURCES 
