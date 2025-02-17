@@ -70,6 +70,7 @@ auto main() -> int {
     if (tokens.size() < 1) {
       continue;
     }
+    //1111
     string command_name = tokens[0];
     // проверяем имя команды
     auto command = Commands.find(command_name);
